@@ -187,15 +187,15 @@ export abstract class OfflineService<T extends BaseModel>{
         this.saveInServer(update)
           .toPromise()
           .then((serverData: any) => {
-            
+
             this.setLastUpdate(serverData.timestamp);
             this.removeUpdate(update);
-            if(update.method !== 'delete'){
+            if (update.method !== 'delete') {
               this.setSynchronized(serverData.data.id, true);
             }
-            
+
             return update;
-          }).catch((error: Error) =>{
+          }).catch((error: Error) => {
             console.log("Error sending request to server. ", error, update);
           })
       );
@@ -203,6 +203,26 @@ export abstract class OfflineService<T extends BaseModel>{
     })
 
     return Promise.all(promises);
+  }
+
+  private syncPullingFromServer(): Promise<T[]> {
+    return this.http.get(`${this.itemApiUrl}/${this.resourceName}`)
+      .map((response: Response) => response.json())
+      .toPromise()
+      .then((serverData: any) => {
+
+        if (serverData.timestamp > this.lastUpdate) {
+          this.setLastUpdate(serverData.timestamp);
+          return this.saveAllInStorage(serverData.data)
+            .then((items: T[]) => {
+              this.listItems$.next(items);
+              //clean storage
+              return items;
+            })
+        }
+
+        return serverData.data;
+      }).catch((err: Error) => console.log("Error fetching data from server: ", err))
   }
 
   private setSynchronized(index: number | string, synchronized: boolean): void {
