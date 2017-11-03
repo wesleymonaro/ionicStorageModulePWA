@@ -2,6 +2,7 @@ import { Headers, Http, Response } from '@angular/http';
 import { Network } from '@ionic-native/network';
 import { Storage } from '@ionic/storage';
 import { BehaviorSubject, Observable } from 'rxjs';
+import 'rxjs/add/operator/toPromise';
 
 import { BaseModel } from "../../interfaces/base-model.interface";
 import { Update } from "../../types/update.type";
@@ -76,6 +77,7 @@ export abstract class OfflineService<T extends BaseModel>{
         this.updates.push(update);
 
         //sync with server
+        this.syncPushingToServer();
         return update;
       })
   }
@@ -174,6 +176,33 @@ export abstract class OfflineService<T extends BaseModel>{
           this.listItems$.getValue().splice(this.listItems$.getValue().indexOf(item), 1);
         })
       })
+  }
+
+  private syncPushingToServer(): Promise<Update<T>[]> {
+    let promises: Promise<Update<T>>[] = [];
+
+    this.updates.forEach((update: Update<T>) => {
+
+      promises.push(
+        this.saveInServer(update)
+          .toPromise()
+          .then((serverData: any) => {
+            
+            this.setLastUpdate(serverData.timestamp);
+            this.removeUpdate(update);
+            if(update.method !== 'delete'){
+              this.setSynchronized(serverData.data.id, true);
+            }
+            
+            return update;
+          }).catch((error: Error) =>{
+            console.log("Error sending request to server. ", error, update);
+          })
+      );
+
+    })
+
+    return Promise.all(promises);
   }
 
   private setSynchronized(index: number | string, synchronized: boolean): void {
