@@ -109,7 +109,7 @@ export abstract class OfflineService<T extends BaseModel>{
               .then(cachedJson => {
                 if (cachedJson.timestamp > this.lastUpdate) {
                   this.listItems$.next(cachedJson.data);
-                  //this.setLastUpdate(cachedJson.timestamp);
+                  this.setLastUpdate(cachedJson.timestamp);
                 }
               })
           }
@@ -117,6 +117,10 @@ export abstract class OfflineService<T extends BaseModel>{
     } else {
       return Promise.resolve();
     }
+  }
+
+  private setLastUpdate(timestamp: number): void{
+    this.lastUpdate = timestamp;
   }
 
 }
