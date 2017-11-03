@@ -35,7 +35,7 @@ export abstract class OfflineService<T extends BaseModel>{
   private getAllFromStorage(): Promise<T[]> {
     return this.storage.ready()
       .then((localForage: LocalForage) => {
-        
+
         let items: T[] = [];
 
         return this.storage.forEach((value: any, key: string, iterationNumber: number) => {
@@ -218,12 +218,30 @@ export abstract class OfflineService<T extends BaseModel>{
             .then((items: T[]) => {
               this.listItems$.next(items);
               //clean storage
+              this.cleanStorage(items);
               return items;
             })
         }
 
         return serverData.data;
       }).catch((err: Error) => console.log("Error fetching data from server: ", err))
+  }
+
+  private cleanStorage(serverItems: T[]): void {
+    if (this.lastUpdate > 0) {
+      this.getAllFromStorage()
+        .then((storageItems: T[]) => {
+
+          let itemsToDelete: T[] = storageItems.filter((storageItem: T) => {
+            return !serverItems.some((serverItem: T) => serverItem.id === storageItem.id);
+          });
+
+          itemsToDelete.forEach((itemToDelete: T) => {
+            this.deleteFromStorage(itemToDelete);
+          });
+
+        });
+    }
   }
 
   private setSynchronized(index: number | string, synchronized: boolean): void {
