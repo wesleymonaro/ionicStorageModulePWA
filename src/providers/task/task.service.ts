@@ -32,4 +32,8 @@ export class TaskService {
   create(task: Task): Promise<Task>{
     return this.storage.set(`tasks.${task.id}`, task);
   }
+
+  update(task: Task): Promise<Task>{
+    return this.create(task);
+  }
 }
