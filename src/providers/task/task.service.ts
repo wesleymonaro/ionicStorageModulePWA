@@ -24,4 +24,8 @@ export class TaskService {
         }).then(() => tasks);
       }).catch(err => console.log(err));
   }
+
+  get(id: number): Promise<Task>{
+    return this.storage.get(`task.${id}`);
+  }
 }
