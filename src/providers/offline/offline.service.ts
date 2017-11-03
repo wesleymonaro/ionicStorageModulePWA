@@ -154,6 +154,17 @@ export abstract class OfflineService<T extends BaseModel>{
       })
   }
 
+  protected updateInServer(item: T): Promise<T> {
+    item.synchronized = false;
+    return this.saveInStorage(item)
+      .then((item: T) => {
+        this.addUpdate(
+          new Update<T>('put', item)
+        );
+        return item;
+      })
+  }
+
   private setSynchronized(index: number | string, synchronized: boolean): void {
     let items: T[] = this.listItems$.getValue();
     for (let i: number = 0; i < items.length; i++) {
