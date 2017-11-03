@@ -30,4 +30,8 @@ export abstract class OfflineService<T extends BaseModel>{
       })
   }
 
+  private saveInStorage(item: T): Promise<T> {
+    return this.storage.set(`${this.resourceName}.${item.id}`, item);
+  }
+
 }
