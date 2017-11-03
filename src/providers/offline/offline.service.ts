@@ -1,7 +1,7 @@
-import { Http } from '@angular/http';
+import { Headers, Http, Response } from '@angular/http';
 import { Network } from '@ionic-native/network';
 import { Storage } from '@ionic/storage';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import { BaseModel } from "../../interfaces/base-model.interface";
 import { Update } from "../../types/update.type";
@@ -9,6 +9,9 @@ import { Update } from "../../types/update.type";
 export abstract class OfflineService<T extends BaseModel>{
 
   protected listItems$: BehaviorSubject<T[]> = new BehaviorSubject<T[]>([]);
+  private headers: Headers = new Headers({
+    'Content-Type': 'application/json'
+  })
   private updates: Update<T>[];
   private lastUpdate: number = 0;
 
@@ -119,18 +122,36 @@ export abstract class OfflineService<T extends BaseModel>{
     }
   }
 
+  private saveInServer(update: Update<T>): Observable<any> {
+    let url: string = `${this.itemApiUrl}/${this.resourceName}`;
+    let responseObservable: Observable<Response>
+
+    switch (update.method) {
+      case 'put':
+        url += `/${update.value.id}`;
+      case 'post':
+        responseObservable = this.http[update.method](url, JSON.stringify(update.value), { headers: this.headers });
+        break;
+      case 'delete':
+        url += `/${update.value.id}`;
+        responseObservable = this.http.delete(url, { headers: this.headers });
+        break;
+    }
+    return responseObservable.map((response: Response) => response.json());
+  }
+
   private setSynchronized(index: number | string, synchronized: boolean): void {
     let items: T[] = this.listItems$.getValue();
     for (let i: number = 0; i < items.length; i++) {
       let item: T = items[i];
-      if(item.id === index){
+      if (item.id === index) {
         item.synchronized = synchronized;
 
         this.saveInStorage(item)
           .then(() => {
             this.listItems$.next(items);
           });
-          break;
+        break;
       }
     }
   }
