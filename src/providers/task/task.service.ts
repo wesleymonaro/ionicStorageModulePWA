@@ -36,4 +36,9 @@ export class TaskService {
   update(task: Task): Promise<Task>{
     return this.create(task);
   }
+
+  delete(id: number): Promise<boolean>{
+    return this.storage.remove(`tasks.${id}`)
+      .then(() => true);
+  }
 }
