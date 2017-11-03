@@ -11,7 +11,7 @@ export class TaskService {
     public storage: Storage
   ) { }
 
-  getAll(): Promise<Task[]> {
+  getAll(reverse?: boolean): Promise<Task[]> {
 
     return this.storage.ready()
       .then((localForage: LocalForage) => {
@@ -21,7 +21,7 @@ export class TaskService {
           if (key.indexOf('tasks.') > -1) {
             tasks.push(task);
           }
-        }).then(() => tasks);
+        }).then(() => (!reverse) ? tasks : tasks.reverse());
       }).catch(err => console.log(err));
   }
 

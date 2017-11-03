@@ -20,7 +20,7 @@ export class HomePage {
   ) { }
 
   ionViewDidLoad() {
-    this.taskService.getAll()
+    this.taskService.getAll(true)
       .then((tasks: Task[]) => {
         this.tasks = tasks;
       })
