@@ -1,7 +1,7 @@
 import { Headers, Http, Response } from '@angular/http';
 import { Network } from '@ionic-native/network';
 import { Storage } from '@ionic/storage';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Subscription, Observable } from 'rxjs';
 import 'rxjs/add/operator/toPromise';
 
 import { BaseModel } from "../../interfaces/base-model.interface";
@@ -16,6 +16,8 @@ export abstract class OfflineService<T extends BaseModel>{
   private updates: Update<T>[];
   private lastUpdate: number = 0;
   private syncIntervalId: number;
+  private networkOnConnectSubscription: Subscription;
+  private networkOnDisconnectSubscription: Subscription;
 
 
   constructor(
@@ -38,6 +40,27 @@ export abstract class OfflineService<T extends BaseModel>{
       .then((updates: Update<T>[]) => {
         this.syncPullingFromServer();
       })
+  }
+
+  private startNetworkListening(): void {
+    this.networkOnConnectSubscription = this.network.onConnect()
+      .subscribe(() => {
+        console.info("Network connected");
+        this.createInterval();
+        this.synchronize();
+      });
+
+    this.networkOnDisconnectSubscription = this.network.onDisconnect()
+      .subscribe(() => {
+        console.info("Network disconnected");
+        this.deleteInterval();
+      });
+  }
+
+  public stopNetworkListening(): void{
+    this.networkOnConnectSubscription.unsubscribe();
+    this.networkOnDisconnectSubscription.unsubscribe();
+    this.deleteInterval();
   }
 
   private createInterval(): void {
