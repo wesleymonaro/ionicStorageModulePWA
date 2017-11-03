@@ -10,6 +10,7 @@ import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { TaskService } from '../providers/task/task.service';
 import { TASK_API_URL } from "../config/task-api-url.injectiontoken";
+import { HttpModule } from "@angular/http";
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { TASK_API_URL } from "../config/task-api-url.injectiontoken";
   ],
   imports: [
     BrowserModule,
+    HttpModule,
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot({
       name: '__tasksDB',
