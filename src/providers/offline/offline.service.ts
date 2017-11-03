@@ -68,9 +68,16 @@ export abstract class OfflineService<T extends BaseModel>{
     return this.storage.set(`updates.${this.resourceName}.${update.value.id}`, update)
       .then((update: Update<T>) => {
         this.updates.push(update);
-        
+
         //sync with server
         return update;
+      })
+  }
+
+  private removeUpdate(update: Update<T>): Promise<void> {
+    return this.storage.remove(`updates.${this.resourceName}.${update.value.id}`)
+      .then(() => {
+        this.updates.splice(this.updates.indexOf(update), 1);
       })
   }
 
