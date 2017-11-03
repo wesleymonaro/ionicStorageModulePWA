@@ -233,7 +233,9 @@ export abstract class OfflineService<T extends BaseModel>{
         this.addUpdate(
           new Update<T>('delete', item)
         ).then((update: Update<T>) => {
-          this.listItems$.getValue().splice(this.listItems$.getValue().indexOf(item), 1);
+          let items: T[] = this.listItems$.getValue();
+          items.splice(items.indexOf(item), 1);
+          this.listItems$.next(items);
         })
       })
   }
