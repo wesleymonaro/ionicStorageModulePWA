@@ -115,7 +115,7 @@ export abstract class OfflineService<T extends BaseModel>{
       .then(() => true);
   }
 
-  private getFromStorage(id: number): Promise<T> {
+  protected getFromStorage(id: number): Promise<T> {
     return this.storage.get(`${this.resourceName}.${id}`);
   }
 

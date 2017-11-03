@@ -3,46 +3,36 @@ import { Storage } from '@ionic/storage';
 
 import { Task } from './../../models/task.model';
 import { TASK_API_URL } from "../../config/task-api-url.injectiontoken";
+import { OfflineService } from "../offline/offline.service";
+import { Http } from "@angular/http";
+import { Network } from "@ionic-native/network";
 
 
 @Injectable()
-export class TaskService {
+export class TaskService extends OfflineService<Task>{
 
   constructor(
-    public storage: Storage,
-    @Inject(TASK_API_URL) public taskApiUrl: string
+    http: Http,
+    network: Network,
+    storage: Storage,
+    @Inject(TASK_API_URL) taskApiUrl: string
   ) { 
-    console.log('TASK_API_URL ', this.taskApiUrl);
-  }
-
-  getAll(reverse?: boolean): Promise<Task[]> {
-
-    return this.storage.ready()
-      .then((localForage: LocalForage) => {
-        let tasks: Task[] = [];
-
-        return this.storage.forEach((task: Task, key: string, iterationNumber: number) => {
-          if (key.indexOf('tasks.') > -1) {
-            tasks.push(task);
-          }
-        }).then(() => (!reverse) ? tasks : tasks.reverse());
-      }).catch(err => console.log(err));
+    super(http, taskApiUrl, network, 'tasks', storage);
   }
 
   get(id: number): Promise<Task>{
-    return this.storage.get(`task.${id}`);
+    return super.getFromStorage(id);
   }
 
   create(task: Task): Promise<Task>{
-    return this.storage.set(`tasks.${task.id}`, task);
+    return super.createInServer(task);
   }
 
   update(task: Task): Promise<Task>{
-    return this.create(task);
+    return super.updateInServer(task);
   }
 
-  delete(id: number): Promise<boolean>{
-    return this.storage.remove(`tasks.${id}`)
-      .then(() => true);
+  delete(task: Task): Promise<void>{
+    return super.deleteInServer(task)
   }
 }
