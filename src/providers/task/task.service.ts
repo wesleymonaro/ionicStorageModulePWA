@@ -28,4 +28,8 @@ export class TaskService {
   get(id: number): Promise<Task>{
     return this.storage.get(`task.${id}`);
   }
+
+  create(task: Task): Promise<Task>{
+    return this.storage.set(`tasks.${task.id}`, task);
+  }
 }
