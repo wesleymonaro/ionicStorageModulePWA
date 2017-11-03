@@ -32,6 +32,13 @@ export abstract class OfflineService<T extends BaseModel>{
     this.getItemsFromCache();
   }
 
+  private synchronize():void{
+    this.syncPushingToServer()
+      .then((updates: Update<T>[]) => {
+        this.syncPullingFromServer();
+      })
+  }
+
   private getAllFromStorage(): Promise<T[]> {
     return this.storage.ready()
       .then((localForage: LocalForage) => {
