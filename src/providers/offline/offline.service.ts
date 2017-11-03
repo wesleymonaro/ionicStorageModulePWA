@@ -150,7 +150,8 @@ export abstract class OfflineService<T extends BaseModel>{
         this.addUpdate(
           new Update<T>('post', item)
         ).then((update: Update<T>) => {
-          this.listItems$.getValue().push(item);
+          let items: T[] = this.listItems$.getValue();
+          this.listItems$.next(items);
         })
 
         return item;
