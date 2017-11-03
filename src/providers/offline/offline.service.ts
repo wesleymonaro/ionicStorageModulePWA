@@ -3,8 +3,12 @@ import { Network } from '@ionic-native/network';
 import { Storage } from '@ionic/storage';
 
 import { BaseModel } from "../../interfaces/base-model.interface";
+import { Update } from "../../types/update.type";
 
 export abstract class OfflineService<T extends BaseModel>{
+
+  private updates: Update<T>[];
+  private lastUpdate: number = 0;
 
 
   constructor(
@@ -13,7 +17,13 @@ export abstract class OfflineService<T extends BaseModel>{
     private network: Network,
     private resourceName: string,
     private storage: Storage
-  ) { }
+  ) {
+    this.init();
+   }
+
+  private init(): void {
+    this.updates = [];
+  }
 
   private getAllFromStorage(): Promise<T[]> {
     return this.storage.ready()
@@ -43,7 +53,7 @@ export abstract class OfflineService<T extends BaseModel>{
     return this.storage.get(`${this.resourceName}.${id}`);
   }
 
-  private saveAllInStorage(items: T[]): Promise<T[]>{
+  private saveAllInStorage(items: T[]): Promise<T[]> {
     let promises: Promise<T>[] = [];
 
     items.forEach((item: T) => {
