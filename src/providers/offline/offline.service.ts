@@ -34,4 +34,9 @@ export abstract class OfflineService<T extends BaseModel>{
     return this.storage.set(`${this.resourceName}.${item.id}`, item);
   }
 
+  private deleteFromStorage(item: T): Promise<boolean>{
+    return this.storage.remove(`${this.resourceName}.${item.id}`)
+      .then(() => true);
+  }
+
 }
