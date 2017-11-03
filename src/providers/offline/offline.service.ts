@@ -1,12 +1,14 @@
 import { Http } from '@angular/http';
 import { Network } from '@ionic-native/network';
 import { Storage } from '@ionic/storage';
+import { BehaviorSubject } from 'rxjs';
 
 import { BaseModel } from "../../interfaces/base-model.interface";
 import { Update } from "../../types/update.type";
 
 export abstract class OfflineService<T extends BaseModel>{
 
+  protected listItems$: BehaviorSubject<T[]> = new BehaviorSubject<T[]>([]);
   private updates: Update<T>[];
   private lastUpdate: number = 0;
 
@@ -23,6 +25,7 @@ export abstract class OfflineService<T extends BaseModel>{
 
   private init(): void {
     this.updates = [];
+    this.getItemsFromCache();
   }
 
   private getAllFromStorage(): Promise<T[]> {
@@ -94,6 +97,26 @@ export abstract class OfflineService<T extends BaseModel>{
           return this.updates;
         })
       })
+  }
+
+  private getItemsFromCache(): Promise<void> {
+    if ('caches' in window) {
+      return self.caches.match(`${this.itemApiUrl}/${this.resourceName}`)
+        .then((response) => {
+          if (response) {
+            return response
+              .json()
+              .then(cachedJson => {
+                if (cachedJson.timestamp > this.lastUpdate) {
+                  this.listItems$.next(cachedJson.data);
+                  //this.setLastUpdate(cachedJson.timestamp);
+                }
+              })
+          }
+        })
+    } else {
+      return Promise.resolve();
+    }
   }
 
 }
