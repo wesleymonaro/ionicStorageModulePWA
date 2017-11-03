@@ -19,7 +19,7 @@ export abstract class OfflineService<T extends BaseModel>{
     private storage: Storage
   ) {
     this.init();
-   }
+  }
 
   private init(): void {
     this.updates = [];
@@ -62,6 +62,16 @@ export abstract class OfflineService<T extends BaseModel>{
 
     return Promise.all(promises);
 
+  }
+
+  private addUpdate(update: Update<T>): Promise<Update<T>> {
+    return this.storage.set(`updates.${this.resourceName}.${update.value.id}`, update)
+      .then((update: Update<T>) => {
+        this.updates.push(update);
+        
+        //sync with server
+        return update;
+      })
   }
 
 }
