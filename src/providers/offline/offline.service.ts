@@ -140,6 +140,20 @@ export abstract class OfflineService<T extends BaseModel>{
     return responseObservable.map((response: Response) => response.json());
   }
 
+  protected createInServer(item: T): Promise<T> {
+    return this.saveInStorage(item)
+      .then((item: T) => {
+
+        this.addUpdate(
+          new Update<T>('post', item)
+        ).then((update: Update<T>) => {
+          this.listItems$.getValue().push(item);
+        })
+
+        return item;
+      })
+  }
+
   private setSynchronized(index: number | string, synchronized: boolean): void {
     let items: T[] = this.listItems$.getValue();
     for (let i: number = 0; i < items.length; i++) {
