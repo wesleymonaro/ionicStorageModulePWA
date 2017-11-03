@@ -39,8 +39,19 @@ export abstract class OfflineService<T extends BaseModel>{
       .then(() => true);
   }
 
-  private getFromStorage(id: number): Promise<T>{
+  private getFromStorage(id: number): Promise<T> {
     return this.storage.get(`${this.resourceName}.${id}`);
+  }
+
+  private saveAllInStorage(items: T[]): Promise<T[]>{
+    let promises: Promise<T>[] = [];
+
+    items.forEach((item: T) => {
+      promises.push(this.saveInStorage(item));
+    });
+
+    return Promise.all(promises);
+
   }
 
 }
