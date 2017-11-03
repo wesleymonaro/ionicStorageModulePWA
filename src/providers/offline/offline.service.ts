@@ -31,8 +31,20 @@ export abstract class OfflineService<T extends BaseModel>{
   }
 
   private init(): void {
+
     this.updates = [];
-    this.getItemsFromCache();
+
+    this.getItemsFromCache()
+      .then(() => this.getAllFromStorage())
+      .then((items: T[]) => this.listItems$.next(items));
+
+    this.getUpdatesFromStorage()
+      .then((updates: Update<T>[]) => {
+        this.synchronize();
+      });
+
+    this.createInterval();
+    this.startNetworkListening();
   }
 
   private synchronize(): void {
@@ -57,7 +69,7 @@ export abstract class OfflineService<T extends BaseModel>{
       });
   }
 
-  public stopNetworkListening(): void{
+  public stopNetworkListening(): void {
     this.networkOnConnectSubscription.unsubscribe();
     this.networkOnDisconnectSubscription.unsubscribe();
     this.deleteInterval();
