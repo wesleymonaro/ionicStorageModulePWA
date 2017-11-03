@@ -36,6 +36,29 @@ export class HomePage {
     this.showAlert(options, task);
   }
 
+  onDelete(task: Task): void{
+    this.alertCtrl.create({
+      title: `Do you want to delete '${task.title}'?`,
+      buttons: [
+        {
+          text: 'Yes',
+          handler: () =>{
+            let loading: Loading = this.showLoading(`Deleting ${task.title}...`);
+
+            this.taskService.delete(task.id)
+              .then((deletado: boolean) => {
+                this.tasks.splice(this.tasks.indexOf(task), 1);
+                loading.dismiss();
+              })
+          }
+        },
+        {
+          text: 'No'
+        }
+      ]
+    }).present();
+  }
+
   private showAlert(options: { itemSliding: ItemSliding, title: string, type: string }, task?: Task): void {
     let alertOptions: AlertOptions = {
       title: options.title,
