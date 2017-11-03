@@ -26,6 +26,16 @@ export class HomePage {
       })
   }
 
+  onSave(type: string, itemSliding?: ItemSliding, task?: Task):void{
+    let title: string = type.charAt(0).toUpperCase() + type.substr(1);
+    let options = {
+      title: `${title} task`,
+      itemSliding: itemSliding,
+      type: type
+    };
+    this.showAlert(options, task);
+  }
+
   private showAlert(options: { itemSliding: ItemSliding, title: string, type: string }, task?: Task): void {
     let alertOptions: AlertOptions = {
       title: options.title,
