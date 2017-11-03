@@ -15,6 +15,7 @@ export abstract class OfflineService<T extends BaseModel>{
   })
   private updates: Update<T>[];
   private lastUpdate: number = 0;
+  private syncIntervalId: number;
 
 
   constructor(
@@ -32,11 +33,26 @@ export abstract class OfflineService<T extends BaseModel>{
     this.getItemsFromCache();
   }
 
-  private synchronize():void{
+  private synchronize(): void {
     this.syncPushingToServer()
       .then((updates: Update<T>[]) => {
         this.syncPullingFromServer();
       })
+  }
+
+  private createInterval(): void {
+    if (!this.syncIntervalId) {
+      this.syncIntervalId = setInterval(() => {
+        this.synchronize();
+      }, 60000)
+    }
+  }
+
+  private deleteInterval(): void {
+    if (this.syncIntervalId) {
+      clearInterval(this.syncIntervalId);
+      this.syncIntervalId = undefined;
+    }
   }
 
   private getAllFromStorage(): Promise<T[]> {
