@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, LoadingController, Loading, ItemSliding, AlertOptions, AlertController } from 'ionic-angular';
+import 'rxjs/add/operator/map';
 
 import { Task } from "../../models/task.model";
 import { TaskService } from "../../providers/task/task.service";
@@ -20,10 +21,12 @@ export class HomePage {
   ) { }
 
   ionViewDidLoad() {
-    this.taskService.getAll(true)
-      .then((tasks: Task[]) => {
-        this.tasks = tasks;
-      })
+    
+    this.taskService.tasks$
+      .map((tasks: Task[]) => tasks.slice().reverse())
+      .subscribe((tasks: Task[]) => this.tasks = tasks);
+
+
   }
 
   onSave(type: string, itemSliding?: ItemSliding, task?: Task):void{
@@ -45,9 +48,9 @@ export class HomePage {
           handler: () =>{
             let loading: Loading = this.showLoading(`Deleting ${task.title}...`);
 
-            this.taskService.delete(task.id)
-              .then((deletado: boolean) => {
-                this.tasks.splice(this.tasks.indexOf(task), 1);
+            this.taskService.delete(task)
+              .then(() => {
+                //this.tasks.splice(this.tasks.indexOf(task), 1);
                 loading.dismiss();
               })
           }
@@ -92,7 +95,7 @@ export class HomePage {
             }
             this.taskService[options.type](contextTask)
               .then((savedTask: Task) => {
-                if (options.type == 'create') this.tasks.unshift(savedTask);
+                //if (options.type == 'create') this.tasks.unshift(savedTask);
                 loading.dismiss();
                 if (options.itemSliding) options.itemSliding.close();
               })
