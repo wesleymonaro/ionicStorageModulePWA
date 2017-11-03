@@ -1,15 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { Storage } from '@ionic/storage';
 
 import { Task } from './../../models/task.model';
+import { TASK_API_URL } from "../../config/task-api-url.injectiontoken";
 
 
 @Injectable()
 export class TaskService {
 
   constructor(
-    public storage: Storage
-  ) { }
+    public storage: Storage,
+    @Inject(TASK_API_URL) public taskApiUrl: string
+  ) { 
+    console.log('TASK_API_URL ', this.taskApiUrl);
+  }
 
   getAll(reverse?: boolean): Promise<Task[]> {
 

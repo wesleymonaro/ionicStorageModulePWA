@@ -9,6 +9,7 @@ import { Network } from '@ionic-native/network';
 import { MyApp } from './app.component';
 import { HomePage } from '../pages/home/home';
 import { TaskService } from '../providers/task/task.service';
+import { TASK_API_URL } from "../config/task-api-url.injectiontoken";
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { TaskService } from '../providers/task/task.service';
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    TaskService
+    TaskService,
+    {provide: TASK_API_URL, useValue: 'http://localhost:3000/api/v1'}
   ]
 })
 export class AppModule {}
