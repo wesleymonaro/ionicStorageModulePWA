@@ -6,10 +6,13 @@ import { TASK_API_URL } from "../../config/task-api-url.injectiontoken";
 import { OfflineService } from "../offline/offline.service";
 import { Http } from "@angular/http";
 import { Network } from "@ionic-native/network";
+import { Observable } from "rxjs";
 
 
 @Injectable()
 export class TaskService extends OfflineService<Task>{
+
+  public tasks$: Observable<Task[]>;
 
   constructor(
     http: Http,
@@ -18,6 +21,7 @@ export class TaskService extends OfflineService<Task>{
     @Inject(TASK_API_URL) taskApiUrl: string
   ) { 
     super(http, taskApiUrl, network, 'tasks', storage);
+    this.tasks$ = this.listItems$;
   }
 
   get(id: number): Promise<Task>{
