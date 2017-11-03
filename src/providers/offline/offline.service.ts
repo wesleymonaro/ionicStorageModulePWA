@@ -119,7 +119,23 @@ export abstract class OfflineService<T extends BaseModel>{
     }
   }
 
-  private setLastUpdate(timestamp: number): void{
+  private setSynchronized(index: number | string, synchronized: boolean): void {
+    let items: T[] = this.listItems$.getValue();
+    for (let i: number = 0; i < items.length; i++) {
+      let item: T = items[i];
+      if(item.id === index){
+        item.synchronized = synchronized;
+
+        this.saveInStorage(item)
+          .then(() => {
+            this.listItems$.next(items);
+          });
+          break;
+      }
+    }
+  }
+
+  private setLastUpdate(timestamp: number): void {
     this.lastUpdate = timestamp;
   }
 
