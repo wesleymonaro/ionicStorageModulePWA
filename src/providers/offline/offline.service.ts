@@ -81,4 +81,19 @@ export abstract class OfflineService<T extends BaseModel>{
       })
   }
 
+  private getUpdatesFromStorage(): Promise<Update<T>[]> {
+    return this.storage.ready()
+      .then((localForage: LocalForage) => {
+        let items: T[] = [];
+
+        return this.storage.forEach((value: any, key: string, iterationNumber: number) => {
+          if (key.indexOf(`updates.${this.resourceName}.`) > -1) {
+            this.updates.push(value);
+          }
+        }).then(() => {
+          return this.updates;
+        })
+      })
+  }
+
 }
