@@ -165,6 +165,17 @@ export abstract class OfflineService<T extends BaseModel>{
       })
   }
 
+  protected deleteInServer(item: T): Promise<void> {
+    return this.deleteFromStorage(item)
+      .then((deleted: boolean) => {
+        this.addUpdate(
+          new Update<T>('delete', item)
+        ).then((update: Update<T>) => {
+          this.listItems$.getValue().splice(this.listItems$.getValue().indexOf(item), 1);
+        })
+      })
+  }
+
   private setSynchronized(index: number | string, synchronized: boolean): void {
     let items: T[] = this.listItems$.getValue();
     for (let i: number = 0; i < items.length; i++) {
